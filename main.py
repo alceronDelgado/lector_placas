@@ -15,16 +15,11 @@ https://programarfacil.com/blog/vision-artificial/deteccion-de-movimiento-con-op
 
 i = 0   
 
-
-#Sacamos una captura a la imagen en cada momento para poder leer el contorno, lo guardamos en la carpeta img
-#imagen = f"img/imagen_{i+1}.jpg"
-
 """
 PRIMER PASO: CAPTURAR OBJETO
 """
 
-
-#Parámetros del triángulo
+#Parámetros del rectángulo
 start_point = (130,150) #Cordenada inicial que representa la parte inferior izquierda del rectángulo
 end_point = (500,300) #Coordenada final que representa la parte superior derecha del rectánculo
 color = (255,0,0) #Color del borde
@@ -32,10 +27,10 @@ tamanio_linea = 1 #grosor de la linea, se mide en pixeles. Si es 1, significa qu
 
 
 #Parámetros del texto
-contenido = "texto" #Texto que desea ser visto - La usaremos para colocar la placa
+contenido = "." #Texto que desea ser visto - La usaremos para colocar la placa
 org = (150,110) #Las coordenas que representan la zona superior izquierda en donde será visible el texto
 fuente = cv.FONT_HERSHEY_COMPLEX #el tipo de fuente que vamos a usar
-escala_fuente = 3 #Escala o tamaño de la fuente
+escala_fuente = 1 #Escala o tamaño de la fuente
 color_texto = (255,255,255) #Color del texto en BGR
 grosor = 2 #grosor de la letra o en inglés conocido como = thickness, se mide en pixeles 2 = 2px
 
@@ -60,41 +55,40 @@ while True:
                 y2 = int(y1 * 2)
                 
                 #Ubicamos el rectánculo en la zona específica 
-                item = cv.rectangle(frame,start_point,end_point,color,1)
                 
                 #Agregamos texto
-                texto_nuevo2 = cv.putText(item,contenido,org,fuente,escala_fuente,color,grosor)
+                frame = cv.putText(frame,contenido,org,fuente,escala_fuente,color,grosor)
                 
-                #Posicionamos el rectangulo en la posición requerida
-                cv.rectangle(texto_nuevo2,(x1,y1),(x2,y2),(0,255,0),2)
+                frame = cv.rectangle(frame,(x1,y1),(x2,y2),color,grosor)
                 
-                #Extraemos los pixeles que están en el rectángulo
-                recorte = texto_nuevo2[y1:y2,x1:x2]
+                #Pasamos Imágen a escala de grises
+                frame_gray = cv.cvtColor(frame,cv.COLOR_BGR2GRAY)
                 
-                #Extraemos los colores de la matriz roja, verde y azul 
-                mb = np.matrix(recorte[:, :,0])
-                mg = np.matrix(recorte[:, :,1])
-                mr = np.matrix(recorte[:, :,2])
+                #Suavisamos el filtro ya que los pixeles cambian muy rápido
+                frame_gray = cv.GaussianBlur(frame_gray,(1,1),0,0)
                 
-                #Extraemos el color amarillo = lo que hacemos aca es restar esos colores para que nos de amarillo = Resta entre matriz verde y azul
-                Color = cv.absdiff(mg,mb)
-                #
-                ##Aplicamos umbral al color = HACEMOS QUE EL COLOR AMARILLO QUEDE EN BLANCO Y LOS OTROS COLORES EN NEGRO
-                _ , umbral = cv.threshold(Color,40,255,cv.THRESH_BINARY)
-                #
-                ##Organizamos y detallamos los contornos
-                contornos = cv.findContours(umbral,cv.RETR_TREE,cv.CHAIN_APPROX_SIMPLE)
-                #
-                ##Ordenamos el contorno para dibujar el más grande primero
-                #contornos = sorted(contornos, key=lambda x : cv.contourArea(x), reverse=True)
+                _, frame_gray = cv.threshold(frame_gray,127,255,cv.THRESH_BINARY)
                 
-
-                cv.imshow("texto2",texto_nuevo2)
-                cv.imshow("recorte",umbral)
+                #buscamos los contornos con los parametros = De la función findcontours = devuelve 2 valores, hierarchy1 y el contorno
+                """"
+                img = la imagen o video que queremos que encuentre los contornos
+                mode = es el modo de recuperación del contorno = usaremos para este ejemplo el de recuperar todos los contornos = cv.RETR_TREE
+                method = método de aproximación de contorno, hay 2 formas = CHAIN_APPROX_SIMPLE y CHAIN_APPROX_NONE = usaremos el none que encuentra todos los puntos del contorno, CHAIN APROX_SIMPLE = Encuentra solo los elementos de las puntas
+                """
+                contorno, _ = cv.findContours(frame_gray, cv.RETR_TREE,cv.CHAIN_APPROX_SIMPLE)
                 
-                #Dibujamos contornos extraidos
-                #for contorno in contornos:
-                #area = cv.contour(contorno)
+                #Parametros
+                """
+                frame = significa en donde queremos dibujar todo los contornos
+                contorno = es el valor devuelto de los contornos encontrados
+                -1 = con esto nos dibuja los contornos 
+                (0,255,0) = es el color verde en forma bgr
+                0 = grosor de la línea
+                """
+                frame = cv.drawContours(frame, contorno, -1, (0,255,0), 3)
+                cv.imshow('imagen',frame)
+                
+                
                 if cv.waitKey(1) & 0xFF == ord('c'):
                     print("Sales del programa")
                     #Guarda una captura de lo último que ve antes de salir del programa

@@ -38,8 +38,6 @@ while True:
         try:
             # Lectura de la cámara
             ret, frame = video.read()
-            #cv.imshow('CAMARA DROIDCAM', frame)
-            
             if ret == False:
                 break
             else:
@@ -56,20 +54,20 @@ while True:
                 
                 #Ubicamos el rectánculo en la zona específica 
                 
-                #Agregamos texto
-                frame = cv.putText(frame,contenido,org,fuente,escala_fuente,color,grosor)
-                
-                frame = cv.rectangle(frame,(x1,y1),(x2,y2),color,grosor)
+                #Agregamos texto TODO: Esto para después de que haya leído el objeto
+                #frame = cv.putText(frame,contenido,org,fuente,escala_fuente,color,grosor)
+                #frame = cv.rectangle(frame,(x1,y1),(x2,y2),color,grosor)
                 
                 #Pasamos Imágen a escala de grises
                 frame_gray = cv.cvtColor(frame,cv.COLOR_BGR2GRAY)
                 
                 #Suavisamos el filtro ya que los pixeles cambian muy rápido
                 frame_gray = cv.GaussianBlur(frame_gray,(1,1),0,0)
+                #frame_gray = cv.GaussianBlur(frame_gray,(1,1),0,0)
                 
-                _, frame_gray = cv.threshold(frame_gray,127,255,cv.THRESH_BINARY)
+                _, frame_gray = cv.threshold(frame_gray,127,200,cv.THRESH_BINARY)
                 
-                #buscamos los contornos con los parametros = De la función findcontours = devuelve 2 valores, hierarchy1 y el contorno
+                #buscamos los contornos con los parametros = De la función findcontours = devuelve 2 valores, valoresHerados y el contorno
                 """"
                 img = la imagen o video que queremos que encuentre los contornos
                 mode = es el modo de recuperación del contorno = usaremos para este ejemplo el de recuperar todos los contornos = cv.RETR_TREE
@@ -82,31 +80,43 @@ while True:
                 frame = significa en donde queremos dibujar todo los contornos
                 contorno = es el valor devuelto de los contornos encontrados
                 -1 = con esto nos dibuja los contornos 
-                (0,255,0) = es el color verde en forma bgr
-                0 = grosor de la línea
+                (0,255,0) = es el color verde en formato BGR
+                3 = grosor de la línea
                 """
-                frame = cv.drawContours(frame, contorno, -1, (0,255,0), 3)
-                cv.imshow('imagen',frame)
-                
+                #frame = cv.drawContours(frame, contorno, -1, (0,255,0), 3)
+                #Filtramos los contornos que se van procesando en el video
+                for c in contorno:
+                    #c es el numpy array de los puntos de todo el contorno
+                    area = cv.contourArea(c)
+                    (x,y,w,h) = cv.boundingRect(c)
+                    print(len(c))
+                    if area > 1000 and area < 100000:
+                        frame = cv.drawContours(frame,[c],0,(0,255,0),3,cv.LINE_AA)
+                        frame = cv.rectangle(frame,(x,y),(x + w , y + h),(0,255,0),1)
+                        cv.imshow('imagen',frame)
+                        if area > 3000 and area < 5000:
+                            frame = cv.drawContours(frame,[c],0,(0,255,0),3,cv.LINE_AA)
+                            frame = cv.rectangle(frame,(x,y),(x + w , y + h),(0,255,0),1)
+                            cv.imshow('imagen',frame)
+                        
                 
                 if cv.waitKey(1) & 0xFF == ord('c'):
                     print("Sales del programa")
                     #Guarda una captura de lo último que ve antes de salir del programa
                     ruta_imagen = f"img/imagen{i+1}.jpg"
+                    imagen = cv.imwrite(ruta_imagen,frame)
+                    i = i + 1
                     break
         except KeyboardInterrupt:
             print("sales del programa por fuerza mayor, presionaste CTRL + C")
             ruta_imagen = f"img/imagen_{i+1}.jpg"
             imagen = cv.imwrite(ruta_imagen,frame)
+            i = i + 1
             break
 
-#Escribo la imágen luego de salir del programa
-#imagen = cv.imwrite(ruta_imagen,frame)
-#Leo la imagen 
-#imagen = cv.imread(ruta_imagen,frame)
-
-#imagen = cv.rectangle(imagen,start_point,end_point,color,tamanio_linea)
-
+#reducir contenedores con esto
+#"https://acodigo.blogspot.com/2017/08/deteccion-de-contornos-con-opencv-python.html"
+#https://www.youtube.com/watch?v=frJO5X5KMxs
 
 # Texto - este texto lo usaremos para mostrar en pantalla el texto que vamos a extraer # Los parámetros están arriba.
 #Contenido[0:7] = colocamos esto porque como un string en python se lee como lista, queremos es que solo lea los caracteres de la placa, en tontal son solo 7

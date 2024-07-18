@@ -6,6 +6,7 @@ import pytesseract
 directorio = "192.168.1.11:4747/video"
 droid_cam = f"http://{directorio}"
 
+
 video = cv.VideoCapture(droid_cam)
 
 """
@@ -44,62 +45,69 @@ while True:
                 #Extraemos con librería numpy la altura, ancho
                 alto, ancho, c = frame.shape
                 
-                #coordenadas X
+                #Sacar el tamaño del eje x
                 x1 = int(ancho / 3)
                 x2 = int(x1 * 2)
-
-                #coordenadas Y
-                y1 = int (alto / 3)
+                
+                #tamaño eje y
+                y1 = int(alto / 4)
                 y2 = int(y1 * 2)
+                #valores = []
+                
+                #if x1 > 1:
+                    #valores.append(x1)
+                    #valores.append(x2)
+                    #valores.append(y1)
+                    #valores.append(y2)
+                    
+                    #print(valores)
+                    #pass
+                
+                    #print(f"Esto vale x1{x1}")
+                    #print(f"Esto vale x1{x2}")
+                    #print(f"Esto vale y1{y1}")
+                    #print(f"Esto vale y1{y2}")
                 
                 #Ubicamos el rectánculo en la zona específica 
                 
                 #Agregamos texto TODO: Esto para después de que haya leído el objeto
-                #frame = cv.putText(frame,contenido,org,fuente,escala_fuente,color,grosor)
-                #frame = cv.rectangle(frame,(x1,y1),(x2,y2),color,grosor)
                 
                 #Pasamos Imágen a escala de grises
                 frame_gray = cv.cvtColor(frame,cv.COLOR_BGR2GRAY)
                 
                 #Suavisamos el filtro ya que los pixeles cambian muy rápido
                 frame_gray = cv.GaussianBlur(frame_gray,(1,1),0,0)
-                #frame_gray = cv.GaussianBlur(frame_gray,(1,1),0,0)
                 
-                _, frame_gray = cv.threshold(frame_gray,127,200,cv.THRESH_BINARY)
+                _, frame_gray = cv.threshold(frame_gray,200,255,cv.THRESH_BINARY_INV)
                 
                 #buscamos los contornos con los parametros = De la función findcontours = devuelve 2 valores, valoresHerados y el contorno
                 """"
                 img = la imagen o video que queremos que encuentre los contornos
-                mode = es el modo de recuperación del contorno = usaremos para este ejemplo el de recuperar todos los contornos = cv.RETR_TREE
+                mode = es el modo de recuperación del contorno = usaremos para este ejemplo el de recuperar todos los contornos = cv.RETR_TREE, nos muestra los contornos internos y externos
                 method = método de aproximación de contorno, hay 2 formas = CHAIN_APPROX_SIMPLE y CHAIN_APPROX_NONE = usaremos el none que encuentra todos los puntos del contorno, CHAIN APROX_SIMPLE = Encuentra solo los elementos de las puntas
                 """
+                ##Nos devuelve 2 cosas, el contorno y la jerarquía de los contornos
                 contorno, _ = cv.findContours(frame_gray, cv.RETR_TREE,cv.CHAIN_APPROX_SIMPLE)
                 
-                #Parametros
-                """
-                frame = significa en donde queremos dibujar todo los contornos
-                contorno = es el valor devuelto de los contornos encontrados
-                -1 = con esto nos dibuja los contornos 
-                (0,255,0) = es el color verde en formato BGR
-                3 = grosor de la línea
-                """
-                #frame = cv.drawContours(frame, contorno, -1, (0,255,0), 3)
-                #Filtramos los contornos que se van procesando en el video
+                
+                #Dibujamos un triángulo en el centro
+                frame_2 = cv.rectangle(frame,(x1,y1),(x2,y2),(0,255,0),3)
+                recorte = frame_2[y1:y2, x1:x2]
                 for c in contorno:
                     #c es el numpy array de los puntos de todo el contorno
                     area = cv.contourArea(c)
                     (x,y,w,h) = cv.boundingRect(c)
-                    print(len(c))
-                    if area > 1000 and area < 100000:
+                    #Estos 2 valores los saque del alto y ancho
+                    if area > 390 and area < 1000:
                         frame = cv.drawContours(frame,[c],0,(0,255,0),3,cv.LINE_AA)
                         frame = cv.rectangle(frame,(x,y),(x + w , y + h),(0,255,0),1)
-                        cv.imshow('imagen',frame)
-                        if area > 3000 and area < 5000:
-                            frame = cv.drawContours(frame,[c],0,(0,255,0),3,cv.LINE_AA)
-                            frame = cv.rectangle(frame,(x,y),(x + w , y + h),(0,255,0),1)
-                            cv.imshow('imagen',frame)
                         
+                    #if area > 100 and area < 300:
+                    #frame = cv.drawContours(frame,[c],0,(0,255,0),3,cv.LINE_AA)
                 
+                cv.imshow('imagen',frame)
+                cv.imshow('recorte',recorte)
+                #cv.imshow('imagen_triangulo',frame_2)
                 if cv.waitKey(1) & 0xFF == ord('c'):
                     print("Sales del programa")
                     #Guarda una captura de lo último que ve antes de salir del programa
@@ -149,4 +157,8 @@ cv.destroyAllWindows()
 
 """
 https://www.youtube.com/watch?v=0-tVTxBRgbY
+
+video para ver y mejorar el código = https://www.youtube.com/watch?v=iSIhsjag1pY
+video para ver y mejorar el código = https://www.youtube.com/watch?v=frJO5X5KMxs&t=189s
+
 """

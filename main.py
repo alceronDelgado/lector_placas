@@ -26,7 +26,6 @@ end_point = (500,300) #Coordenada final que representa la parte superior derecha
 color = (255,0,0) #Color del borde
 tamanio_linea = 1 #grosor de la linea, se mide en pixeles. Si es 1, significa que es 1px.
 
-
 #Parámetros del texto
 contenido = "." #Texto que desea ser visto - La usaremos para colocar la placa
 org = (150,110) #Las coordenas que representan la zona superior izquierda en donde será visible el texto

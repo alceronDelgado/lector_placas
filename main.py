@@ -39,12 +39,10 @@ while True:
     try:
         # Lectura de la cámara
         ret, frame = video.read()
-        if ret == False:
-            break
+        if ret == False: break
         else:
             #Extraemos con librería numpy la altura, ancho
             alto, ancho, c = frame.shape
-                
             #Sacar el tamaño del eje x
             x1 = int(ancho / 3)
             x2 = int(x1 * 2)
@@ -53,19 +51,15 @@ while True:
             y1 = int(alto / 4)
             y2 = int(y1 * 2)
 
-            #Ubicamos el rectánculo en la zona específica 
-                
-            #Agregamos texto TODO: Esto para después de que haya leído el objeto
-                
             #Pasamos Imágen a escala de grises
             frame_gray = cv.cvtColor(frame,cv.COLOR_BGR2GRAY)
-                
+
             #Suavisamos el filtro ya que los pixeles cambian muy rápido
             frame_gray = cv.GaussianBlur(frame_gray,(1,1),0,0)
-                
+
             _, frame_gray = cv.threshold(frame_gray,155,255,cv.THRESH_BINARY)
             #_, frame_gray = cv.threshold(frame_gray,200,255,cv.THRESH_BINARY_INV)
-                
+
             #buscamos los contornos con los parametros = De la función findcontours = devuelve 2 valores, valoresHerados y el contorno
             """"
             img = la imagen o video que queremos que encuentre los contornos
@@ -74,8 +68,8 @@ while True:
             """
             ##Nos devuelve 2 cosas, el contorno y la jerarquía de los contornos
             contorno, _ = cv.findContours(frame_gray, cv.RETR_TREE,cv.CHAIN_APPROX_SIMPLE)
-                
-                
+            
+            
             #Dibujamos un triángulo en el centro
             #frame_2 = cv.rectangle(frame,(x1,y1),(x2,y2),(0,255,0),3)
             #recorte = frame_2[y1:y2, x1:x2]
@@ -88,13 +82,10 @@ while True:
                 aproximado = cv.approxPolyDP(c, cuadrado, True)
                 # Len aproximado == 4 significa si el area contiene 4 vertices
                 if len(aproximado)== 4 and area > 8000:
-                    #print("area=",area)
-                    #frame = cv.rectangle(frame,(x,y),(x + w , y + h),(0,255,0),1)
-                    #frame = cv.drawContours(frame,[c],0,(0,255,0),3,cv.LINE_AA)
                     #Usarmos el aspect radio para determinar el contorno y saber que se trate de un rectángulo
                     aspect_radio = float(300.6)/151.2
                     #print("aspect radio=",aspect_radio)
-                    if aspect_radio > 1.5 and aspect_radio < 2.5: 
+                    if aspect_radio > 1.8: 
                         frame = cv.drawContours(frame,[c],0,(0,255,0),3,cv.LINE_AA)
                         # guardamos el area de la placa, para eso vamos a usar los contornos encontrados con boundingRect
                         placa_figura = frame_gray[y:y + h, x:x + w]
@@ -104,12 +95,17 @@ while True:
                         placa figura = corresponde a lo que queremos leer
                         config = modo de segmentación de página, usaremos la forma --psm 11, podemos probar con otras pero el resultadode conocimiento de caracteres puede cambiar
                         """
+                        #print(placa_figura)
                         texto = pytesseract.image_to_string(placa_figura,config='--psm 1')
-                        if len(texto) == 7:
+                        if len(texto) >= 7 and len(texto) <= 10:
                             print("texto placa ",texto)
-                            
+                            #Colocamos texto en pantalla de lo que se lee
+                            frame = cv.putText(frame,texto,(140,70),cv.FONT_HERSHEY_SIMPLEX,2,(255,255,0),3)
+                            #guardar placa en archivo de texto
+                            f = open('text/lector_placas.txt','a')
+                            f.write('\n' + texto)
+                            f.close()
             cv.imshow('imagen',frame)
-            cv.imshow('placa',placa_figura)
             if cv.waitKey(1) & 0xFF == ord('c'):
                 print("Sales del programa")
                 #Guarda una captura de lo último que ve antes de salir del programa
@@ -128,6 +124,8 @@ cv.waitKey(1)
 video.release() #Cerramos video
 cv.destroyAllWindows()
 
+#Creamos esto para el archivo ejecutable
+#input()
 """
 
 Artículos de interes

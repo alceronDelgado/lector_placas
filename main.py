@@ -109,14 +109,13 @@ while True:
                         placa figura = corresponde a lo que queremos leer
                         config = modo de segmentación de página, usaremos la forma --psm 11, podemos probar con otras pero el resultadode conocimiento de caracteres puede cambiar
                         """
-                        #print(placa_figura)
                         texto = pytesseract.image_to_string(placa_figura,config='--psm 1')
                         if len(texto) >= 7 and len(texto) <= 10:
                             print("texto placa ",texto)
                             #Colocamos texto en pantalla de lo que se lee
                             frame = cv.putText(frame,texto,(140,70),cv.FONT_HERSHEY_SIMPLEX,2,(255,255,0),3)
                             #guardar placa en archivo de texto
-                            f = open('text/lector_placas.txt','a')
+                            f = open('lector_placas.txt','a')
                             f.write('\n' + texto)
                             f.close()
             cv.imshow('imagen',frame)

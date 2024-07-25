@@ -8,11 +8,23 @@ from setuptools import setup
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Users\lalej\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
 
-directorio = "192.168.1.12:4747/video"
-droid_cam = f"http://{directorio}"
 
+camara_opcion = input("Seleccione el tipo de la cámara siendo 1 valor por defecto de tu computadora o 0 usando dirección IP. \n")
 
-video = cv.VideoCapture(droid_cam)
+if camara_opcion == '1': 
+    video = cv.VideoCapture(0)
+    print('video capture definido como por defecto')
+elif camara_opcion == '0':
+    print("-------------------")
+    print('video capture definido por IP \n')
+    print("para usar esta opciónes debes instalar la aplicación DROID CAM en tu teléfono \n") 
+    print("ve a la google play y busca la Aplicación DROIDCAM: instalala y ejecutala, cuando la ejecutes encontraras 2 formas de acceso: \n")
+    print(", a tra ves de WIFI IP y IP CAM ACCESS,usaremos IP CAMACCESS: su estructura de dirección es más o menos la siguiente: http://192.168.1.12:4747/video \n")
+    directorio = input("digite la dirección IP \n")
+    #directorio = "192.168.1.12:4747/video"
+    droid_cam = f"http://{directorio}"
+    video = cv.VideoCapture(droid_cam)
+    print("-------------------")
 
 i = 0   
 
@@ -33,6 +45,9 @@ fuente = cv.FONT_HERSHEY_COMPLEX #el tipo de fuente que vamos a usar
 escala_fuente = 1 #Escala o tamaño de la fuente
 color_texto = (255,255,255) #Color del texto en BGR
 grosor = 2 #grosor de la letra o en inglés conocido como = thickness, se mide en pixeles 2 = 2px
+
+
+
 
 while True:
     try:
@@ -137,3 +152,6 @@ https://programarfacil.com/blog/vision-artificial/deteccion-de-movimiento-con-op
 https://acodigo.blogspot.com/2017/08/deteccion-de-contornos-con-opencv-python.html
 
 """
+
+#if __name__ == '__main__':
+#    main()

@@ -5,15 +5,14 @@ import pytesseract
 #TODO: Hacer archivo ejecutable
 from setuptools import setup
 
-#Es necesario tener pytesseract instalado en el computador para poder usar la librería de detector de archivos
+
 pytesseract.pytesseract.tesseract_cmd = r'C:\Users\lalej\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
 
+directorio = "192.168.1.12:4747/video"
+droid_cam = f"http://{directorio}"
 
 
-print("-------------------")
-print("lector de placas")
-print("para usar esta aplicación debes de tener en cuenta que puedes usar tu cámara por defecto o la aplicación DROID CAM")
-print("-------------------")
+video = cv.VideoCapture(droid_cam)
 
 i = 0   
 
@@ -35,31 +34,22 @@ escala_fuente = 1 #Escala o tamaño de la fuente
 color_texto = (255,255,255) #Color del texto en BGR
 grosor = 2 #grosor de la letra o en inglés conocido como = thickness, se mide en pixeles 2 = 2px
 
-
-camara_opcion = input("Seleccione el tipo de la cámara siendo 1 valor por defecto de tu computadora o 0 usando dirección IP. \n")
-
-if camara_opcion == '1': 
-    video = cv.VideoCapture(0)
-    print('video capture definido como por defecto')
-elif camara_opcion == '0':
-    print("-------------------")
-    print('video capture definido por IP \n')
-    print("para usar esta opciónes debes instalar la aplicación DROID CAM en tu teléfono \n") 
-    print("ve a la google play y busca la Aplicación DROIDCAM: instalala y ejecutala, cuando la ejecutes encontraras 2 formas de acceso: \n")
-    print(", a tra ves de WIFI IP y IP CAM ACCESS,usaremos IP CAMACCESS: su estructura de dirección es más o menos la siguiente: http://192.168.1.12:4747/video \n")
-    directorio = input("digite la dirección IP \n")
-    #directorio = "192.168.1.12:4747/video"
-    droid_cam = f"http://{directorio}"
-    video = cv.VideoCapture(droid_cam)
-    print("-------------------")
-
-
 while True:
     try:
         # Lectura de la cámara
         ret, frame = video.read()
         if ret == False: break
         else:
+            #Extraemos con librería numpy la altura, ancho
+            alto, ancho, c = frame.shape
+            #Sacar el tamaño del eje x
+            x1 = int(ancho / 3)
+            x2 = int(x1 * 2)
+                
+            #tamaño eje y
+            y1 = int(alto / 4)
+            y2 = int(y1 * 2)
+
             #Pasamos Imágen a escala de grises
             frame_gray = cv.cvtColor(frame,cv.COLOR_BGR2GRAY)
 
@@ -75,11 +65,10 @@ while True:
             mode = es el modo de recuperación del contorno = usaremos para este ejemplo el de recuperar todos los contornos = cvRETR_TREE, nos muestra los contornos internos y externos
             method = método de aproximación de contorno, hay 2 formas = CHAIN_APPROX_SIMPLE y CHAIN_APPROX_NONE = usaremos el none queencuentra todos los puntos del contorno, CHAIN APROX_SIMPLE = Encuentra solo los elementos de las puntas
             """
-            #Nos devuelve 2 cosas, el contorno y la jerarquía de los contornos
+            ##Nos devuelve 2 cosas, el contorno y la jerarquía de los contornos
             contorno, _ = cv.findContours(frame_gray, cv.RETR_TREE,cv.CHAIN_APPROX_SIMPLE)
             
-            advertencia = "pulsa C para salir"
-            frame = cv.putText(frame,advertencia,(140,100),cv.FONT_HERSHEY_SIMPLEX,1,(255,255,0),1)
+            
             #Dibujamos un triángulo en el centro
             #frame_2 = cv.rectangle(frame,(x1,y1),(x2,y2),(0,255,0),3)
             #recorte = frame_2[y1:y2, x1:x2]
@@ -111,14 +100,13 @@ while True:
                             print("texto placa ",texto)
                             #Colocamos texto en pantalla de lo que se lee
                             frame = cv.putText(frame,texto,(140,70),cv.FONT_HERSHEY_SIMPLEX,2,(255,255,0),3)
-                            
                             #guardar placa en archivo de texto
-                            f = open('lector_placas.txt','a')
+                            f = open('text/lector_placas.txt','a')
                             f.write('\n' + texto)
                             f.close()
             cv.imshow('imagen',frame)
             if cv.waitKey(1) & 0xFF == ord('c'):
-                print("Presiona Enter para salir del programa")
+                print("Sales del programa")
                 #Guarda una captura de lo último que ve antes de salir del programa
                 ruta_imagen = f"img/imagen{i+1}.jpg"
                 imagen = cv.imwrite(ruta_imagen,frame)
@@ -126,7 +114,6 @@ while True:
                 break
     except KeyboardInterrupt:
         print("sales del programa por fuerza mayor, presionaste CTRL + C")
-        print("Presiona Enter para salir del programa")
         ruta_imagen = f"img/imagen_{i+1}.jpg"
         imagen = cv.imwrite(ruta_imagen,frame)
         i = i + 1
@@ -136,10 +123,10 @@ cv.waitKey(1)
 video.release() #Cerramos video
 cv.destroyAllWindows()
 
-#Creamos esto para el archivo ejecutable cuando vaya a terminar el video 
-input()
-
+#Creamos esto para el archivo ejecutable
+#input()
 """
+
 Artículos de interes
 https://www.youtube.com/watch?v=0-tVTxBRgbY
 

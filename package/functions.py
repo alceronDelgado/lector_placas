@@ -1,4 +1,7 @@
 import cv2 as cv
+#Reconocimiento único de caracteres
+import pytesseract
+pytesseract.pytesseract.tesseract_cmd = r'C:\Users\lalej\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
 
 def menu():
     try:
@@ -54,17 +57,29 @@ def video_recording(video):
                     if aspect_radio > 1.8: 
                         frame = cv.drawContours(frame,[c],0,(0,255,0),3,cv.LINE_AA)
                         placa_figura = frame_gray[y:y + h, x:x + w]
-                        #texto = pytesseract.image_to_string(placa_figura,config='--psm 1')
-                        #if len(texto) >= 7 and len(texto) <= 10:
-                            #print("texto placa ",texto)
-                            #frame = cv.putText(frame,texto,(140,70),cv.FONT_HERSHEY_SIMPLEX,2,(255,255,0),3)
-                            #f = open('lector_placas.txt','a')
-                            #f.write('\n' + texto)
-                            #f.close()
+                        texto = pytesseract.image_to_string(placa_figura,config='--psm 1')
+                        if len(texto) >= 7 and len(texto) <= 10:
+                            print("texto placa ",texto)
+                            frame = cv.putText(frame,texto,(140,70),cv.FONT_HERSHEY_SIMPLEX,2,(255,255,0),3)
+                            exportar_doc(texto)        
             cv.imshow('imagen',frame)
             if cv.waitKey(1) & 0xFF == ord('c'):
-                print("Sales del programa")
+                cerrar_video(video)
                 break
         except KeyboardInterrupt:
             print("sales del programa por fuerza mayor, presionaste CTRL + C")
             break
+
+def exportar_doc(texto):
+    print('texto placa',texto)
+    f = open('lector_placas.txt','a')
+    f.write('\n' + texto)
+    f.close()
+
+
+def cerrar_video(video):
+    cv.waitKey(1)
+    video.release() #Cerramos video
+    cv.destroyAllWindows()
+    print("precione enter para cerrar el programa")
+    input()

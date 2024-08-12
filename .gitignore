@@ -1,2 +1,13 @@
+# Byte-compiled / optimized / DLL files
+__pycache__
+__pycache__/
+*.pyc
+*.manifest
+*.spec
+*.egg-info
+build/
 dist/
-build/main
+bin/
+lib/
+lib64/
+src/*.egg-info
